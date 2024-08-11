@@ -5,7 +5,7 @@ import logging
 from . import models 
 from .database import engine, get_db
 from sqlalchemy.orm import Session
-
+from .schema import Post,PostCreate
 app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__) 
@@ -13,11 +13,7 @@ logger = logging.getLogger(__name__)
 # Automatic creation of tables 
 models.Base.metadata.create_all(bind=engine)
 
-# Data model for posts
-class Post(BaseModel):
-    title: str
-    content: str
-    published: bool = True
+
 
 @app.get("/")
 async def root():
@@ -30,7 +26,7 @@ def get_posts(db: Session = Depends(get_db)):
     return posts
 # Create a Post
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_post(post: Post, db: Session = Depends(get_db)):
+def create_post(post: PostCreate, db: Session = Depends(get_db)):
     new_post = models.Post(**post.dict())
     db.add(new_post)
     db.commit()
@@ -49,7 +45,8 @@ def update_post(id: int, post: Post, db: Session = Depends(get_db)):
     existing_post = db.query(models.Post).filter(models.Post.id == id).first()
     if not existing_post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
-    
+    #post=existing_post = db.query(models.Post).filter(models.Post.id == id)
+    #post.update(synchronize_session=False)
     for key, value in post.dict().items():
         setattr(existing_post, key, value)
     
@@ -61,7 +58,8 @@ def delete_post(id: int, db: Session = Depends(get_db)):
     existing_post = db.query(models.Post).filter(models.Post.id == id).first()
     if not existing_post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
-    
+    #post=existing_post = db.query(models.Post).filter(models.Post.id == id)
+    #post.delete(synchronize_session=False)
     db.delete(existing_post)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
