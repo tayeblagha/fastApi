@@ -1,16 +1,16 @@
-from typing import Optional, List
-from fastapi import Body, Depends, FastAPI, Response, status, HTTPException
-from pydantic import BaseModel
+
+from fastapi import  FastAPI
 import logging
-from . import models ,utils
-from .database import engine, get_db
-from sqlalchemy.orm import Session
-from .schema import Post, PostCreate, PostResponse, UserCreate, UserOut
-from .utils import hash_password
-from .routers import user,post
+
+from . import models 
+from .database import engine
+from .routers import user,post,auth,vote
 app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__) 
+from .config import settings
+
+
 
 # Automatic creation of tables 
 models.Base.metadata.create_all(bind=engine)
@@ -21,3 +21,5 @@ async def root():
 
 app.include_router(post.router)
 app.include_router(user.router)
+app.include_router(auth.router)
+app.include_router(vote.router)
