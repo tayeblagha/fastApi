@@ -1,0 +1,4 @@
+venv\Scripts\activate.bat
+uvicorn app.main:app
+pip freeze > requirements.txt
+pip install -r requirements.txt
